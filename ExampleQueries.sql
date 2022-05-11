@@ -23,8 +23,7 @@ limit 100
 -- Query Three calc yearly increase from jan to december
 select "ZHVI00".city, "ZHVI00"."State","ZHVI00"."2000-01-31" ,"ZHVI00"."2000-12-31" , (("ZHVI00"."2000-12-31"-"ZHVI00"."2000-01-31")/"ZHVI00"."2000-01-31")*100 as pctChange, geom
 from "ZHVI00"
-join geomzip00 g 
-on g.zcta5ce00 = "ZHVI00"."RegionName" 
+join geomzip00 g on g.zcta5ce00 = "ZHVI00"."RegionName" 
 where "ZHVI00"."2000-01-31" is not null and "ZHVI00"."2000-12-31" is not null
 order by pctChange desc
 limit 100
@@ -32,7 +31,7 @@ limit 100
 -- Detroit Michigan is the top.. Wow
 
 
--- Query 3a do same for 2010
+-- Query 4 do same for 2010
 select "ZHVI10"."City" , "ZHVI10"."State","ZHVI10"."2010-01-31" ,"ZHVI10"."2010-12-31" , (("ZHVI10"."2010-12-31"-"ZHVI10"."2010-01-31")/"ZHVI10"."2010-01-31")*100 as pctChange
 from "ZHVI10" 
 where "ZHVI10"."2010-01-31" is not null and "ZHVI10"."2010-12-31" is not null
@@ -41,17 +40,17 @@ limit 100
 
 --again jackson ms wow
 
--- Query 4 now stitch together. 
+-- Query 5 now stitch together. 
 
 -- geom makes this one realllyyy slowww
 select "ZHVI10"."City" , "ZHVI10"."State", (("ZHVI00"."2000-12-31"-"ZHVI00"."2000-01-31")/"ZHVI00"."2000-01-31")*100 as pctChange00, (("ZHVI10"."2010-12-31"-"ZHVI10"."2010-01-31")/"ZHVI10"."2010-01-31")*100 as pctChange10, geom
-from "geomzip10","ZHVI10"
-join "ZHVI00"
-on "ZHVI00"."RegionID" = "ZHVI10"."RegionID" 
+from "ZHVI10"
+join "ZHVI00" on "ZHVI00"."RegionID" = "ZHVI10"."RegionID" 
+join geomzip10 g on g.zcta5ce10 = "ZHVI10"."RegionName" 
 where "ZHVI00"."2000-01-31" is not null and "ZHVI00"."2000-12-31" is not null and "ZHVI10"."2010-01-31" is not null and "ZHVI10"."2010-12-31" is not null
 order by pctChange10 desc
 limit 100
-
+-- Query 5 without geom
 select "ZHVI10"."City" , "ZHVI10"."State", (("ZHVI00"."2000-12-31"-"ZHVI00"."2000-01-31")/"ZHVI00"."2000-01-31")*100 as pctChange00, (("ZHVI10"."2010-12-31"-"ZHVI10"."2010-01-31")/"ZHVI10"."2010-01-31")*100 as pctChange10
 from "ZHVI10"
 join "ZHVI00"
