@@ -9,22 +9,23 @@ order by zhvi00."2000-01-31" desc
 limit 100
 
 
--- Query Two calc pop increase from 2000 to 2010
-select census00.minimum_age,census00.maximum_age,census00.zipcode,census00.population as pop00, census10.population as pop10, ((census00.population-census10.population)/census00.population)*100 as PctPopChange
-from census00, census10
-join census00 c 
-on c.zipcode = census10.zipcode and c.minimum_age = census10.minimum_age 
-where census00.zipcode = '01760' and census00.population is not null and census10.population is not null and census00.population > 0
+-- Query Two Find most populous areas for people 25 to 29 for year 2000 join to ZHVI to find town name
+select census00.minimum_age,census00.maximum_age,census00.gender,census00.zipcode,census00.population as pop00, z.city,z."State"
+from census00
+join "ZHVI00" z 
+on z."RegionID" = census00.zipcode 
+where census00.population is not null and census00.minimum_age is not null and census00.maximum_age  is not null and census00.population > 0 and census00.minimum_age = 25 and census00.gender in ('male')
+order by pop00 desc
 limit 100
--- ???join????
--- nope div by 0 likely need to convert to a stored procedure and integrate null handling or clean data better 
--- done 
+
 
 
 -- Query Three calc yearly increase from jan to december
-select zhvi00.city, zhvi00."State",zhvi00."2000-01-31" ,zhvi00."2000-12-31" , ((zhvi00."2000-12-31"-zhvi00."2000-01-31")/zhvi00."2000-01-31")*100 as pctChange
-from zhvi00
-where zhvi00."2000-01-31" is not null and zhvi00."2000-12-31" is not null
+select "ZHVI00".city, "ZHVI00"."State","ZHVI00"."2000-01-31" ,"ZHVI00"."2000-12-31" , (("ZHVI00"."2000-12-31"-"ZHVI00"."2000-01-31")/"ZHVI00"."2000-01-31")*100 as pctChange, geom
+from "ZHVI00"
+join geomzip00 g 
+on g.zcta5ce00 = "ZHVI00"."RegionName" 
+where "ZHVI00"."2000-01-31" is not null and "ZHVI00"."2000-12-31" is not null
 order by pctChange desc
 limit 100
 
@@ -58,18 +59,6 @@ on "ZHVI00"."RegionID" = "ZHVI10"."RegionID"
 where "ZHVI00"."2000-01-31" is not null and "ZHVI00"."2000-12-31" is not null and "ZHVI10"."2010-01-31" is not null and "ZHVI10"."2010-12-31" is not null
 order by pctChange10 desc
 limit 100
-
-create view test as 
-	select "ZHVI10"."City" , "ZHVI10"."State", (("ZHVI00"."2000-12-31"-"ZHVI00"."2000-01-31")/"ZHVI00"."2000-01-31")*100 as pctChange00, (("ZHVI10"."2010-12-31"-"ZHVI10"."2010-01-31")/"ZHVI10"."2010-01-31")*100 as pctChange10, geom
-	from "geomzip10","ZHVI10"
-	join "ZHVI00"
-	on "ZHVI00"."RegionID" = "ZHVI10"."RegionID" 
-	where "ZHVI00"."2000-01-31" is not null and "ZHVI00"."2000-12-31" is not null and "ZHVI10"."2010-01-31" is not null and "ZHVI10"."2010-12-31" is not null
-	order by pctChange10 desc
-	
-select * from test limit 100
-
-
 
 
 -- Query 5 Stored procedure??
